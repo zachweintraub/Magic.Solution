@@ -1,0 +1,24 @@
+@{
+    Layout = "_Layout";
+}
+
+<h1>All cards</h1>
+
+
+
+@foreach(var card in @ViewBag.Service.Value)
+{
+ <form action="/cards/new/@ViewBag.Page" method="post">
+    <img src="@card.ImageUrl">
+    <button type="submit" value="@card.Id" name="cardId">Add to collection</button>
+ </form>
+
+
+}
+
+
+@for(int i = @ViewBag.Page; i < @ViewBag.Page + 10; i++)
+{
+    <span><a href="/show/@i"><b>@i</b></a>   </span>
+   
+}
