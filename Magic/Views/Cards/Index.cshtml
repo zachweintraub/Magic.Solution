@@ -1,0 +1,10 @@
+@using Magic.Models;
+
+@{
+    Layout = "_Layout";
+}
+
+@foreach(DBCard card in @Model)
+{
+    <img src="@card.ImgUrl"/>
+}

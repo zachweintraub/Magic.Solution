@@ -4,6 +4,7 @@ using MtgApiManager.Lib.Service;
 using MtgApiManager.Lib.Core;
 using MtgApiManager.Lib.Dto;
 using System;
+using System.Collections.Generic;
 
 namespace Magic.Models
 {
@@ -11,6 +12,9 @@ namespace Magic.Models
     {
         private int _id;
         public int Id {get{return _id;}}
+        
+        private string _api_id;
+        public string ApiId {get{return _api_id;}}
 
         private string _name;
         public string Name { get{return _name;} }
@@ -36,9 +40,10 @@ namespace Magic.Models
         private string _text;
         public string Text { get{return _text;} }
 
-        public DBCard(int id, string name, string manaCost, string colors, string type, string toughness, string power, string imgUrl, string text)
+        public DBCard(int id, string api_id, string name, string manaCost, string colors, string type, string toughness, string power, string imgUrl, string text)
         {
             _id = id;
+            _api_id = api_id;
             _name = name;
             _manaCost = manaCost;
             _colors = colors;
@@ -94,7 +99,7 @@ namespace Magic.Models
                 cmd.Parameters.Add(name);
                 MySqlParameter mana_cost = new MySqlParameter("@mana_cost", result.Value.ManaCost);
                 cmd.Parameters.Add(mana_cost);
-                MySqlParameter colors = new MySqlParameter("@colors", string.Join(", ", result.Value.Colors));
+                MySqlParameter colors = new MySqlParameter("@colors", result.Value.Colors);
                 cmd.Parameters.Add(colors);
                 MySqlParameter type = new MySqlParameter("@type", result.Value.Type);
                 cmd.Parameters.Add(type);
@@ -102,7 +107,7 @@ namespace Magic.Models
                 cmd.Parameters.Add(toughness);
                 MySqlParameter power = new MySqlParameter("@power", result.Value.Power);
                 cmd.Parameters.Add(power);
-                MySqlParameter image_url = new MySqlParameter("@image_url", result.Value.ImageUrl);
+                MySqlParameter image_url = new MySqlParameter("@image_url", result.Value.ImageUrl.ToString());
                 cmd.Parameters.Add(image_url);
                 MySqlParameter text = new MySqlParameter("@text", result.Value.Text);
                 cmd.Parameters.Add(text);
@@ -112,28 +117,44 @@ namespace Magic.Models
                 conn.Close();
                 if(conn != null){conn.Dispose();}
             }
+        }
 
-            public static List<DBCard> GetAll()
+        public static List<DBCard> GetAll()
+        {
+            List<DBCard> allCards = new List<DBCard>{};
+
+            MySqlConnection conn = DB.Connection();
+            conn.Open();
+            MySqlCommand cmd = conn.CreateCommand() as MySqlCommand;
+            cmd.CommandText = @"SELECT * FROM cards;";
+            MySqlDataReader rdr = cmd.ExecuteReader();
+
+
+            string mana, colors, type, toughness, power, imgUrl, text;
+            mana = colors = type = toughness = power = imgUrl = text = "n/a";
+
+            while (rdr.Read())
             {
-                MySqlConnection conn = DB.Connection();
-                conn.Open();
-                MySqlCommand cmd = conn.CreateCommand() as MySqlCommand;
-                cmd.CommandText = @"SELECT * cards;";
-                MySqlDataReader rdr = cmd.ExecuteReader();
+                int id = rdr.GetInt32(0);
+                string apiId = rdr.GetString(1);
+                string name = rdr.GetString(2);
 
+                if(!rdr.IsDBNull(3)) { mana = rdr.GetString(3); }
+                if(!rdr.IsDBNull(4)) { colors = rdr.GetString(4); }
+                if(!rdr.IsDBNull(5)) { type = rdr.GetString(5); }
+                if(!rdr.IsDBNull(6)) { toughness = rdr.GetString(6); }
+                if(!rdr.IsDBNull(7)) { power = rdr.GetString(7); }
+                if(!rdr.IsDBNull(8)) { imgUrl = rdr.GetString(8); }
+                if(!rdr.IsDBNull(9)) { text = rdr.GetString(9); }
 
-                string mana, colors, type, toughness, power, imgUrl, text = "n/a";
-                while (rdr.Read())
-                {
-                    if(!rdr.IsDBNull(3)) { mana = rdr.GetString(3); }
-                    if(!rdr.IsDBNull(4)) { mana = rdr.GetString(4); }
-                    if(!rdr.IsDBNull(5)) { mana = rdr.GetString(5); }
-                    if(!rdr.IsDBNull(6)) { mana = rdr.GetString(6); }
-                    if(!rdr.IsDBNull(7)) { mana = rdr.GetString(7); }
-                    if(!rdr.IsDBNull(8)) { mana = rdr.GetString(8); }
-                    if(!rdr.IsDBNull(9)) { mana = rdr.GetString(9); }
-                }
+                DBCard card = new DBCard(id, apiId, name, mana, colors, type, toughness, power, imgUrl, text);
+                allCards.Add(card);
             }
+            
+            conn.Close();
+            if(conn!=null) conn.Dispose();
+
+            return allCards;
         }
     }
 }

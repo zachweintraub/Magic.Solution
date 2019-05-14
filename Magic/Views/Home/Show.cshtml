@@ -6,15 +6,15 @@
 
 
 
+<form action="/cards/new/@ViewBag.Page" method="post">
 @foreach(var card in @ViewBag.Service.Value)
 {
- <form action="/cards/new/@ViewBag.Page" method="post">
     <img src="@card.ImageUrl">
-    <button type="submit" value="@card.Id" name="cardId">Add to collection</button>
- </form>
+    <button type="submit" value="@card.Id" name="cardId">Add</button>
 
 
 }
+ </form>
 
 
 @for(int i = @ViewBag.Page; i < @ViewBag.Page + 10; i++)

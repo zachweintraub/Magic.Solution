@@ -16,7 +16,8 @@ namespace Magic.Controllers
         [HttpGet("/cards")]
         public ActionResult Index()
         {
-            return View(DBCard.GetAll());
+            List<DBCard> cards = DBCard.GetAll();
+            return View(cards);
         }
     }
 }

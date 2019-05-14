@@ -16,13 +16,7 @@ namespace Magic.Controllers
         [HttpGet("/")]
         public ActionResult Index()
         {
-
-            CardService service = new CardService();
-            var result = service.Where(x => x.Page, 1)
-                  .Where(x => x.PageSize, 100)
-                  .All();
-
-            return View(result);
+            return View();
         }
 
         [HttpGet("/show/{pageNum}")]
@@ -31,7 +25,7 @@ namespace Magic.Controllers
 
             CardService service = new CardService();
             var result = service.Where(x => x.Page, pageNum)
-                  .Where(x => x.PageSize, 100)
+                  .Where(x => x.PageSize, 20)
                   .All();
 
             ViewBag.Page = pageNum;
